@@ -964,26 +964,38 @@ var _e = class {
 	_extractNumber(e, t) {
 		let n = e.attributes || {}, r = [
 			t?.number_attribute,
+			"from_name",
 			"with_name",
-			"to_name",
-			"with",
-			"to",
 			"from",
+			"with",
 			"caller_id",
-			"called_number",
-			"number",
 			"from_number",
+			"number",
+			"to_name",
+			"to",
 			"to_number"
-		];
-		for (let t of r) {
-			if (!t) continue;
-			let r = t === "friendly_name" ? e.attributes?.friendly_name : n[t];
-			if (typeof r == "string" && r.trim() && r.trim().toLowerCase() !== "unknown") return r.trim();
+		], i = [
+			t?.number_attribute,
+			"to_name",
+			"with_name",
+			"to",
+			"with",
+			"called_number",
+			"to_number",
+			"number",
+			"from_name",
+			"from",
+			"from_number"
+		], a = e.state === "ringing" ? r : i;
+		for (let e of a) {
+			if (!e) continue;
+			let t = n[e];
+			if (typeof t == "string" && t.trim() && t.trim().toLowerCase() !== "unknown") return t.trim();
 		}
 		return e.entity_id;
 	}
 	_extractLabel(e, t) {
-		let n = e.attributes || {}, r = (n.type || "").toLowerCase(), i = n.with_name && n.with_name.toLowerCase() !== "unknown" ? n.with_name : n.with, a = n.to_name && n.to_name.toLowerCase() !== "unknown" ? n.to_name : n.to, o = this._localize(`state.${e.state}`) || e.state;
+		let n = e.attributes || {}, r = (n.type || "").toLowerCase(), i = typeof n.from_name == "string" && n.from_name.trim() && n.from_name.toLowerCase() !== "unknown" ? n.from_name : typeof n.with_name == "string" && n.with_name.trim() && n.with_name.toLowerCase() !== "unknown" ? n.with_name : n.from || n.with, a = n.to_name && n.to_name.toLowerCase() !== "unknown" ? n.to_name : n.to, o = this._localize(`state.${e.state}`) || e.state;
 		return e.state === "dialing" ? o = this._formatTranslation(this._localize(r === "outgoing" || a ? "call.outgoing_to" : "call.incoming_from"), { name: a || n.from || this._localize("common.unknown") }) : e.state === "ringing" ? o = i ? this._formatTranslation(this._localize("call.missed_from"), { name: i }) : this._localize("call.missed_call") : e.state === "talking" && (o = this._formatTranslation(this._localize(r === "outgoing" || a ? "call.outgoing_to" : "call.incoming_from"), { name: r === "outgoing" || a ? a || i : i || n.from || this._localize("common.unknown") })), (o || t?.label || n.call_type || n.direction || n.source || n.destination || e.state).trim();
 	}
 	_formatTranslation(e, t = {}) {
@@ -1009,7 +1021,7 @@ var _e = class {
 		return r;
 	}
 	render() {
-		let e = this.config?.title || this._localize("common.call_history"), t = this._filter === "all" ? this.calls : this.calls.filter((e) => this._filter === "missed" ? e.state === "ringing" : this._filter === "outgoing" ? e.type === "outgoing" || e.state === "dialing" : this._filter === "incoming" ? !(e.type === "outgoing" || e.state === "dialing") && e.state !== "ringing" : !0), n = "padding:4px 10px; border-radius:12px; border:1px solid var(--divider-color, #ddd); background:var(--card-background-color, #fff); color:var(--primary-text-color); cursor:pointer; font-size:11px; font-weight:500; transition: all 0.2s;", r = "background:var(--primary-color, #1e88e5); color:#fff; border-color:var(--primary-color, #1e88e5);";
+		let e = this.config?.title || this._localize("common.call_history"), t = this._filter === "all" ? this.calls : this.calls.filter((e) => this._filter === "missed" ? e.state === "ringing" : this._filter === "outgoing" ? e.type === "outgoing" || e.state === "dialing" : this._filter !== "incoming" || !(e.type === "outgoing" || e.state === "dialing") && e.state !== "ringing"), n = "padding:4px 10px; border-radius:12px; border:1px solid var(--divider-color, #ddd); background:var(--card-background-color, #fff); color:var(--primary-text-color); cursor:pointer; font-size:11px; font-weight:500; transition: all 0.2s;", r = "background:var(--primary-color, #1e88e5); color:#fff; border-color:var(--primary-color, #1e88e5);";
 		if (this._loading) {
 			this.innerHTML = `<ha-card header="${e}"><div style="padding:16px; min-height:80px; color:var(--secondary-text-color); font-size:13px;">${this._localize("common.loading") || "Loading..."}</div></ha-card>`;
 			return;

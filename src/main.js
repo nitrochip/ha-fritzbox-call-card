@@ -138,20 +138,70 @@ class FritzboxCallCard extends HTMLElement {
   }
 
   _extractNumber(state, entityConfig) {
-    const attrs = state.attributes || {};
-    const keys = [entityConfig?.number_attribute, 'with_name', 'to_name', 'with', 'to', 'from', 'caller_id', 'called_number', 'number', 'from_number', 'to_number'];
-    for (const k of keys) {
-      if (!k) continue;
-      const val = k === 'friendly_name' ? state.attributes?.friendly_name : attrs[k];
-      if (typeof val === 'string' && val.trim() && val.trim().toLowerCase() !== 'unknown') return val.trim();
+  const attrs = state.attributes || {};
+
+  const incomingKeys = [
+    entityConfig?.number_attribute,
+    'from_name',
+    'with_name',
+    'from',
+    'with',
+    'caller_id',
+    'from_number',
+    'number',
+    'to_name',
+    'to',
+    'to_number'
+  ];
+
+  const outgoingKeys = [
+    entityConfig?.number_attribute,
+    'to_name',
+    'with_name',
+    'to',
+    'with',
+    'called_number',
+    'to_number',
+    'number',
+    'from_name',
+    'from',
+    'from_number'
+  ];
+
+  const keys = state.state === 'ringing'
+    ? incomingKeys
+    : outgoingKeys;
+
+  for (const key of keys) {
+    if (!key) continue;
+
+    const value = attrs[key];
+
+    if (
+      typeof value === 'string' &&
+      value.trim() &&
+      value.trim().toLowerCase() !== 'unknown'
+    ) {
+      return value.trim();
     }
-    return state.entity_id;
   }
+
+  return state.entity_id;
+}
 
   _extractLabel(state, entityConfig) {
     const attrs = state.attributes || {};
     const type = (attrs.type || '').toLowerCase();
-    const caller = attrs.with_name && attrs.with_name.toLowerCase() !== 'unknown' ? attrs.with_name : attrs.with;
+    const caller =
+    typeof attrs.from_name === 'string' &&
+    attrs.from_name.trim() &&
+    attrs.from_name.toLowerCase() !== 'unknown'
+      ? attrs.from_name
+      : typeof attrs.with_name === 'string' &&
+          attrs.with_name.trim() &&
+          attrs.with_name.toLowerCase() !== 'unknown'
+        ? attrs.with_name
+        : attrs.from || attrs.with;
     const target = attrs.to_name && attrs.to_name.toLowerCase() !== 'unknown' ? attrs.to_name : attrs.to;
     let label = this._localize(`state.${state.state}`) || state.state;
 
