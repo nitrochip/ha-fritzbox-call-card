@@ -143,8 +143,8 @@ class FritzboxCallCard extends HTMLElement {
   const incomingKeys = [
     entityConfig?.number_attribute,
     'from_name',
-    'with_name',
     'from',
+    'with_name',
     'with',
     'caller_id',
     'from_number',
